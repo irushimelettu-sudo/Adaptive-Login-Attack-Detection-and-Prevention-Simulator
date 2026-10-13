@@ -1,6 +1,6 @@
 # Adaptive Login Attack Detection and Prevention Simulator
 
-A **Master's Semester 3 cybersecurity mini-project** built with Python and Flask. It demonstrates controlled login-attack simulations, account lockouts, honeypot detection, and **explainable rule-based risk scoring** through a local security dashboard and PDF reports.
+**A cybersecurity mini-project** built with Python and Flask. It demonstrates controlled login-attack simulations, account lockouts, honeypot detection, and **explainable rule-based risk scoring** through a local security dashboard and PDF reports.
 
 > **Educational use only.** This is a localhost demonstration, not a production authentication service or an AI/ML detection system. Use only synthetic credentials and your own simulator.
 
