@@ -1,22 +1,27 @@
-# Login Brute Force Protection Simulator
+# Adaptive Login Attack Detection and Prevention Simulator
 
-A **Master's Semester 3 academic mini-project** demonstrating how repeated login attempts can trigger account lockouts and honeypot alerts. It is a local, educational simulation, **not a production authentication system**.
+A **Master's Semester 3 cybersecurity mini-project** built with Python and Flask. It demonstrates controlled login-attack simulations, account lockouts, honeypot detection, and **explainable rule-based risk scoring** through a local security dashboard and PDF reports.
+
+> **Educational use only.** This is a localhost demonstration, not a production authentication service or an AI/ML detection system. Use only synthetic credentials and your own simulator.
 
 ## Features
 
-- Flask-based demonstration login page
-- Three-failure lockout (10 seconds)
-- Honeypot accounts that trigger longer lockouts (600 seconds)
-- Passwords stored as salted PBKDF2 hashes (no plaintext passwords in storage)
-- CSV event logging **without recording attempted passwords**
-- Bounded, localhost-only test client
-- Charts and PDF report summarizing simulated login events
+- **Login demonstration:** Flask webpage with salted PBKDF2 password hashes for predefined demo accounts.
+- **Prevention controls:** A regular account locks for 10 seconds after three incorrect passwords; honeypot accounts trigger a 600-second lockout and never authenticate.
+- **Attack simulator:** Bounded, localhost-only client supporting brute-force, password-spraying, credential-stuffing, and mixed synthetic scenarios.
+- **Rule-based detection:** A rolling 60-second risk score (0–100), with severity, a suspected pattern, and contributing signals.
+- **Live dashboard:** Automatically refreshes every two seconds, showing login outcomes, lockouts, honeypot alerts, active locks, recent events, and risk indicators.
+- **Reporting:** Charts and a PDF summary of recorded login events.
+- **Automated tests:** Unit tests for authentication, lockouts, honeypots, dashboard statistics, and detection/scenario behavior.
 
 ## Requirements
 
-Python **3.10+** on Windows, macOS, or Linux. Internet access is needed only to install Python dependencies. The demo server binds to `127.0.0.1`.
+- Python 3.10 or newer
+- Dependencies listed in `requirements.txt`: Flask, Requests, and Matplotlib
 
-## Run on Windows (PowerShell)
+## Setup and run (Windows / VS Code PowerShell)
+
+From the project directory:
 
 ```powershell
 py -3.10 -m venv .venv
@@ -24,87 +29,130 @@ py -3.10 -m venv .venv
 .\.venv\Scripts\python.exe app.py
 ```
 
-Open **http://127.0.0.1:5000/**. In a second PowerShell window, from this project folder:
+Open these pages in your browser:
 
-```powershell
-.\.venv\Scripts\python.exe attacker.py --attempts 30
-.\.venv\Scripts\python.exe analyze.py
-```
+- **Login form:** http://127.0.0.1:5000/
+- **Security dashboard:** http://127.0.0.1:5000/dashboard
 
-The generated charts and PDF will be in `reports/`. Stop the server with **Ctrl+C**.
+Leave the server running. Open a **second VS Code terminal** in the same folder to run simulations.
 
-On macOS/Linux, use `python3 -m venv .venv` and `.venv/bin/python` instead of the Windows interpreter path.
+On macOS/Linux, create the environment with `python3 -m venv .venv` and use `.venv/bin/python` instead of `.\.venv\Scripts\python.exe`.
 
-## Demo accounts
+## Demo credentials
 
-| Username | Password | Behavior |
-|---|---|---|
-| `alice` | `DemoPass123!` | Successful demo login; three failures cause a 10-second lockout |
-| `admin_test` | `HoneyDemo123!` | Honeypot; every login attempt triggers a 600-second lockout |
-| `root_local` | `HoneyRoot123!` | Honeypot; every login attempt triggers a 600-second lockout |
+| Username | Password | Expected behavior |
+| --- | --- | --- |
+| `alice` | `DemoPass123!` | Successful demo login when not locked |
+| `admin_test` | `HoneyDemo123!` | Honeypot: login always rejected; triggers a 600-second lockout |
+| `root_local` | `HoneyRoot123!` | Honeypot: login always rejected; triggers a 600-second lockout |
 
-These are **public demonstration credentials only**. Never reuse real passwords. The login success message does not create a real authenticated session.
+For `alice`, three incorrect passwords trigger a **10-second account lockout**. The published credentials are synthetic and must never be reused for real accounts. A successful demo login does not create a real authenticated session.
 
-## How to demonstrate
+## Run the simulated attacks
 
-1. Start the Flask app and open the page.
-2. Log in as `alice` with the correct demo password to see a successful result.
-3. Submit three incorrect passwords for `alice` to trigger a temporary lockout.
-4. Try `admin_test` to demonstrate honeypot detection.
-5. Run the bounded test client against **your own localhost simulator only**.
-6. Run `analyze.py` to create the event report.
+With `app.py` running, execute these commands in a second terminal:
 
-## Project layout
-
-- `app.py` — Flask UI, hashed demo accounts, lockouts, honeypot logic and CSV event logging
-- `attacker.py` — bounded localhost-only login-attempt generator
-- `analyze.py` — report and chart generator
-- `requirements.txt` — dependencies
-- `runtime_data/` — generated accounts and logs (excluded from Git)
-- `reports/` — generated figures and PDF (excluded from Git)
-
-## Limitations and responsible use
-
-- This is a **teaching prototype**, not a deployable security product.
-- Lockouts are account-based, not a comprehensive rate-limiting or bot-defense system.
-- The demonstration does not implement real user sessions, CSRF protection, or a production account lifecycle.
-- Local JSON storage is suitable only for this small demonstration, not concurrent multi-server use.
-- Use only dummy accounts and synthetic attempts. Do not point the test client at external sites or real services.
-- Never expose the Flask development server publicly.
-
-## Origin
-
-Adapted and cleaned up from an existing Master's Semester 3 academic mini-project for portfolio presentation. Core educational ideas (login attempts, lockouts, honeypot accounts, and analysis) are preserved.
-
-
-## Live monitoring dashboard (portfolio upgrade)
-
-Start the Flask application and open **http://127.0.0.1:5000/dashboard**. The dashboard refreshes every two seconds and shows real counts from `runtime_data/timeline.csv`: login attempts, failed/successful logins, lockout events, honeypot alerts, active account locks, an activity chart, and recent events.
-
-In a second terminal, run `python attacker.py --attempts 30` to generate bounded, synthetic localhost-only traffic. The terminal now prints the actual login response (invalid, locked, or successful), rather than only HTTP 200.
-
-Run `python analyze.py` to export the PDF report and charts to `reports/`. Generated data and reports are ignored by Git.
-
-**Limitations:** This is a local academic simulator, not a production authentication system. Dashboard data is intentionally unauthenticated for localhost teaching use. Lockouts are per demo account and are not an IP-based rate limiter.
-
-## Adaptive detection upgrade
-
-The dashboard now includes a **60-second rolling risk score (0–100)** with an explainable category and contributing signals. The detector uses failure volume, concentration on one account, number of targeted accounts, and honeypot events. Risk is heuristic and resets as events age out; it does **not** use machine learning or guarantee attack attribution. The existing lockout and honeypot rules provide the prevention component.
-
-### Run controlled attack scenarios
-
-With `app.py` running, use a second terminal:
+**Single-account brute-force simulation:**
 
 ```powershell
 .\.venv\Scripts\python.exe attacker.py --scenario bruteforce --attempts 30
+```
+
+**Password-spraying simulation:**
+
+```powershell
 .\.venv\Scripts\python.exe attacker.py --scenario spraying --attempts 30
+```
+
+**Synthetic credential-stuffing simulation:**
+
+```powershell
 .\.venv\Scripts\python.exe attacker.py --scenario stuffing --attempts 30
 ```
 
-- **Bruteforce:** multiple synthetic guesses for `alice`.
-- **Spraying:** one synthetic password against several demo usernames.
-- **Stuffing:** distinct, synthetic username/password pairs across demo accounts.
+**Mixed demo traffic:**
 
-Open `/dashboard` to watch risk signals and lockouts. These patterns may overlap in a short simulation: **password spraying and credential stuffing cannot be reliably distinguished from username/outcome logs alone**, so the dashboard correctly labels both as *multi-account burst*. The test client's `X-Demo-Scenario` header records the *known simulated scenario* for later evaluation; it is **not used as a detection signal**. All traffic is hardcoded to loopback, capped at 100 requests per run. Never use against real accounts.
+```powershell
+.\.venv\Scripts\python.exe attacker.py --scenario mixed --attempts 30
+```
 
-Run `python -m unittest -v test_app` to execute the original and additional detection tests.
+The script sends requests **only to `http://127.0.0.1:5000/`**, allows **1–100 attempts per run**, and prints each server response (such as invalid credentials or account locked). The demo includes predefined accounts and an unknown synthetic username; it does not test real websites or credentials.
+
+Open the dashboard while a scenario runs to see counters and recent events update. Because the risk score uses a 60-second window, its value can decrease after recent activity expires. Account lockouts can also affect later demonstrations; wait for them to expire when needed.
+
+## How detection works
+
+`detection.py` evaluates failed login events from the **last 60 seconds**. The risk score combines:
+
+- Number of recent failed attempts
+- Highest failure count against one account
+- Number of distinct targeted usernames
+- Honeypot-trigger events
+
+The score is capped at **100**. Severity is **low** below 35, **medium** from 35 to 64, and **high** from 65 upward.
+
+The detector assigns a descriptive pattern based on its rules:
+
+| Pattern | Rule |
+| --- | --- |
+| Honeypot activity | At least one recent `honeypot_triggered` event |
+| Multi-account burst (spraying/stuffing-like) | At least 6 failures across 3 or more usernames, without a honeypot trigger taking precedence |
+| Single-account brute-force pattern | At least 3 recent failures against one username, without a higher-priority pattern |
+| Insufficient evidence | None of the above rules match |
+
+These are **heuristics, not proof of the attack type**. Password spraying and credential stuffing can produce similar username/outcome patterns. The simulator records a scenario label in the event log for demonstration context, but the detector **does not use that label** to decide its classification.
+
+The risk score informs monitoring; **account lockouts and honeypot rules** provide the actual prevention behavior. This project does not implement adaptive risk-based blocking.
+
+## Generate the PDF report
+
+After recording some login attempts:
+
+```powershell
+.\.venv\Scripts\python.exe analyze.py
+```
+
+The report is saved at:
+
+```text
+reports/login_analysis_report.pdf
+```
+
+Four PNG charts are also saved in `reports/`. The report summarizes recorded attempts, successes/failures, lockout and honeypot events, scenario labels, and a risk assessment at the **last recorded event's timestamp**. It does **not** calculate detection accuracy, precision, recall, or false-positive rates.
+
+## Run the tests
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -v
+```
+
+This discovers the authentication/dashboard tests and the additional detection and scenario-generation tests in `test_app.py`.
+
+## Project structure
+
+```text
+.
+├── app.py            # Flask login form, dashboard, API, lockouts, honeypots, event logging
+├── attacker.py       # Local-only synthetic attack scenarios
+├── detection.py      # Rolling-window risk score and heuristic classification
+├── analyze.py        # PNG charts and PDF report
+├── test_app.py       # Automated tests
+├── requirements.txt  # Python dependencies
+├── .gitignore        # Excludes local environment and generated artifacts
+└── README.md
+```
+
+At runtime, the app creates `runtime_data/` for synthetic user records and event logs. Reporting creates `reports/`. Both directories, along with `.venv/`, should remain outside version control.
+
+## Scope and limitations
+
+- Intended for **local academic demonstration only**; the Flask development server binds to `127.0.0.1` with debug mode disabled.
+- Demo accounts and passwords are intentionally public. Passwords are stored as salted hashes, and attempted passwords are **not** written to event logs.
+- The dashboard is unauthenticated because it is a local teaching tool; do not expose it to a public network.
+- The project does not provide production login sessions, CSRF protection, distributed rate limiting, or comprehensive bot detection.
+- Risk scoring is **rule-based**, not machine learning. It does not guarantee attack attribution or provide a measured detection accuracy.
+- Local JSON/CSV storage is appropriate for a small simulator, not a multi-server deployment.
+
+## Academic context
+
+Originally developed as a Master's Semester 3 cybersecurity mini-project and subsequently refined for portfolio presentation with a monitoring dashboard, synthetic attack scenarios, explainable risk scoring, tests, and reporting.
