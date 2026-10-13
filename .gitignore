@@ -1,0 +1,13 @@
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+runtime_data/
+reports/
+login_attempts.log
+timeline.csv
+users.json
+*.png
+*.pdf
+.env
